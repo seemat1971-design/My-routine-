@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#6b5b95">
+<title>Seema's Life Dashboard</title>
+<style>
+:root{--bg:#f6f4fa;--card:#fff;--ink:#292536;--muted:#746f80;--accent:#6b5b95;--line:#e7e1f0;--green:#287a57}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45}
+header{background:linear-gradient(135deg,#6b5b95,#9383bd);color:white;padding:25px 18px 22px;border-radius:0 0 24px 24px}
+header h1{font-size:24px;margin:0 0 5px} header p{margin:0;opacity:.92;font-size:14px}
+main{max-width:760px;margin:auto;padding:14px 14px 40px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:-2px;margin-bottom:14px}
+.stat{background:var(--card);padding:13px 10px;border-radius:14px;text-align:center;box-shadow:0 2px 10px #2e21400b}
+.stat strong{display:block;font-size:22px}.stat span{font-size:12px;color:var(--muted)}
+.tabs{display:flex;gap:8px;overflow:auto;padding:2px 0 12px}
+.tab{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;padding:10px 14px;font-weight:650;white-space:nowrap}
+.tab.active{background:var(--accent);border-color:var(--accent);color:white}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:13px;box-shadow:0 3px 12px #2e214008}
+h2{font-size:18px;margin:0 0 12px} h3{font-size:15px;margin:15px 0 8px}
+.task{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #f0edf4}
+.task:last-child{border-bottom:0}.task input{width:20px;height:20px;accent-color:var(--green);margin-top:2px;flex-shrink:0}
+.task label{flex:1}.task.done label{text-decoration:line-through;color:#8b8793}
+.detail{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.tag{font-size:11px;color:var(--accent);background:#f0ecf8;padding:3px 7px;border-radius:7px;display:inline-block;margin-top:5px}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.addrow{display:flex;gap:8px;margin-top:12px}.addrow input{min-width:0;flex:1;border:1px solid var(--line);border-radius:10px;padding:11px}
+.primary{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:11px 14px;font-weight:650}
+.secondary{background:#f0edf7;color:var(--accent);border:0;border-radius:10px;padding:9px 12px}
+.note{font-size:12px;color:var(--muted)}
+.location{background:#faf8fd;border:1px solid var(--line);padding:12px;border-radius:12px;margin-bottom:8px}
+.location strong{display:block}.location p{margin:5px 0 0;color:var(--muted);font-size:14px}
+textarea{width:100%;min-height:70px;border:1px solid var(--line);border-radius:10px;padding:10px}
+.empty{color:var(--muted);font-size:14px;padding:8px 0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:10px}
+@media(min-width:600px){header{padding-left:calc((100% - 720px)/2);padding-right:calc((100% - 720px)/2)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Seema's Life Dashboard 🌷</h1>
+  <p>आपके काम, पढ़ाई, परिवार और जरूरी चीज़ें — एक जगह</p>
+</header>
+<main>
+  <div class="summary">
+    <div class="stat"><strong id="remaining">0</strong><span>बाकी काम</span></div>
+    <div class="stat"><strong id="completed">0</strong><span>पूरे हुए</span></div>
+    <div class="stat"><strong id="total">0</strong><span>कुल काम</span></div>
+  </div>
+  <nav class="tabs" aria-label="Dashboard sections">
+    <button class="tab active" data-tab="tasks">काम</button>
+    <button class="tab" data-tab="study">पढ़ाई</button>
+    <button class="tab" data-tab="upcoming">आने वाले काम</button>
+    <button class="tab" data-tab="locations">चीज़ें कहाँ रखीं</button>
+    <button class="tab" data-tab="notes">Notes</button>
+  </nav>
+
+  <section id="tasks" class="view">
+    <div class="panel">
+      <h2>आज / Pending काम</h2>
+      <div id="taskList"></div>
+      <div class="addrow"><input id="newTask" placeholder="नया काम लिखें…"><button class="primary" id="addTask">+ जोड़ें</button></div>
+      <p class="note">किसी काम को पूरा करने के लिए उसके आगे checkbox tick करें। बदलाव इसी फोन/ब्राउज़र में सेव होंगे।</p>
+    </div>
+    <div class="panel">
+      <h2>याद रखने वाली बातें</h2>
+      <div class="location"><strong>पढ़ाई शुरू करने का लक्ष्य</strong><p>Weekdays में सुबह 10:45 बजे बैठना। शुरुआत 10 मिनट से भी कर सकती हैं; Yoga course का lecture आम तौर पर 60–75 मिनट का होता है।</p></div>
+      <div class="location"><strong>साप्ताहिक routine</strong><p>सुबह 6:45 Breathing class · 7:30–8:30 Yoga · उसके बाद breakfast। रविवार को सेवा और सत्संग के कारण पढ़ाई अनिवार्य नहीं।</p></div>
+    </div>
+  </section>
+
+  <section id="study" class="view" hidden>
+    <div class="panel">
+      <h2>Study Tracker 📚</h2>
+      <div id="studyList"></div>
+      <p class="note">लक्ष्य पहले बैठने की आदत बनाना है; समय मिले तो एक घंटे या उससे अधिक पढ़ सकती हैं।</p>
+    </div>
+    <div class="panel">
+      <h2>पढ़ाई का रिकॉर्ड</h2>
+      <label for="studyNote" class="note">आज क्या पढ़ा / अगला कदम</label>
+      <textarea id="studyNote" placeholder="जैसे: Yoga lecture 2 का आधा भाग देखा…"></textarea>
+      <button class="primary" id="saveStudy" style="margin-top:8px">Study note सेव करें</button>
+      <p id="studySaved" class="note" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section id="upcoming" class="view" hidden>
+    <div class="panel">
+      <h2>आने वाले काम</h2>
+      <div id="upcomingList"></div>
+      <div class="addrow"><input id="newUpcoming" placeholder="नया upcoming काम…"><button class="primary" id="addUpcoming">+ जोड़ें</button></div>
+      <p class="note">तारीख/समय बाद में काम के नाम में जोड़ सकती हैं, जैसे “दिवाली की पूजा की सामग्री — 5 Nov”।</p>
+    </div>
+  </section>
+
+  <section id="locations" class="view" hidden>
+    <div class="panel">
+      <h2>मेरी चीज़ें कहाँ रखीं 📍</h2>
+      <div id="locationList"></div>
+      <h3>नई चीज़ की जगह सेव करें</h3>
+      <input id="thingName" placeholder="चीज़ का नाम" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:8px">
+      <textarea id="thingPlace" placeholder="कहाँ रखी है?"></textarea>
+      <button class="primary" id="addLocation" style="margin-top:8px">जगह सेव करें</button>
+    </div>
+  </section>
+
+  <section id="notes" class="view" hidden>
+    <div class="panel">
+      <h2>Quick Notes</h2>
+      <textarea id="quickNotes" placeholder="जो भी याद रखना हो, यहाँ लिखें…"></textarea>
+      <button class="primary" id="saveNotes" style="margin-top:8px">Notes सेव करें</button>
+      <p id="notesSaved" class="note" aria-live="polite"></p>
+    </div>
+    <div class="panel">
+      <h2>अपना डेटा सुरक्षित रखें</h2>
+      <p class="note">यह dashboard इसी browser में जानकारी सेव करता है। Browser data clear करने या दूसरे फोन पर खोलने से पहले backup रखना बेहतर है।</p>
+      <button class="secondary" id="exportData">Backup डाउनलोड करें</button>
+      <label class="secondary" style="display:inline-block;margin-left:6px">Backup वापस लाएँ <input type="file" id="importData" accept=".json,application/json" style="display:none"></label>
+      <p id="backupStatus" class="note" aria-live="polite"></p>
+    </div>
+  </section>
+  <footer>Seema's personal planner · Editable on your phone</footer>
+</main>
+<script>
+const KEY='seemaLifeDashboard_v1';
+const defaultData={
+ tasks:[
+  {id:'hair',text:'संस्कृति का hair work — status confirm करना',done:false},
+  {id:'dress',text:'संस्कृति की dress finalise करना',done:false},
+  {id:'hm',text:'बच्चों के साथ H&M जाना / shopping',done:false},
+  {id:'ashu',text:'आशुतोष से insurance papers का follow-up',done:false},
+  {id:'show',text:'संस्कृति के साथ शाम 6:30 बजे show',done:false},
+  {id:'party',text:'शाम 8:30 बजे party',done:false}
+ ],
+ study:[
+  {id:'yoga',text:'Yoga Teachers Course — lecture/video (60–75 मिनट)',done:false},
+  {id:'breathing',text:'Breathing की किताबें पढ़ना',done:false},
+  {id:'osho',text:'Osho की 112 Techniques वाली किताब पढ़ना',done:false}
+ ],
+ upcoming:[
+  {id:'diwali',text:'दिवाली की पूरी तैयारी',done:false},
+  {id:'kitty',text:'अगले महीने की couple kitty की तैयारी',done:false},
+  {id:'molly',text:'Molly के साथ Bhattacharya Madam के यहाँ जाना — नया समय तय करना',done:false}
+ ],
+ locations:[{id:'bag',name:'Couple Kitty का बैग',place:'अपने कमरे में, बाथरूम के पास वाले नीचे के drawer में।'}],
+ studyNote:'',quickNotes:''
+};
+let data;
+try{data=JSON.parse(localStorage.getItem(KEY))||structuredClone(defaultData)}catch(e){data=JSON.parse(JSON.stringify(defaultData))}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));renderAll()}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderTasks(listId,arr,kind){
+ const el=document.getElementById(listId);
+ el.innerHTML=arr.length?arr.map(t=>`<div class="task ${t.done?'done':''}"><input type="checkbox" aria-label="पूरा हुआ" data-kind="${kind}" data-id="${esc(t.id)}" ${t.done?'checked':''}><label>${esc(t.text)}</label><button class="secondary" data-delete="${kind}" data-id="${esc(t.id)}" aria-label="काम हटाएँ">×</button></div>`).join(''):'<div class="empty">अभी कोई काम नहीं।</div>';
+}
+function renderLocations(){document.getElementById('locationList').innerHTML=data.locations.length?data.locations.map(x=>`<div class="location"><strong>${esc(x.name)}</strong><p>${esc(x.place)}</p><button class="secondary" data-delete="locations" data-id="${esc(x.id)}" style="margin-top:8px">हटाएँ</button></div>`).join(''):'<div class="empty">अभी कोई location सेव नहीं है।</div>'}
+function renderAll(){
+ renderTasks('taskList',data.tasks,'tasks');renderTasks('studyList',data.study,'study');renderTasks('upcomingList',data.upcoming,'upcoming');renderLocations();
+ const all=[...data.tasks,...data.study,...data.upcoming];document.getElementById('total').textContent=all.length;document.getElementById('completed').textContent=all.filter(x=>x.done).length;document.getElementById('remaining').textContent=all.filter(x=>!x.done).length;
+ document.getElementById('studyNote').value=data.studyNote||'';document.getElementById('quickNotes').value=data.quickNotes||'';
+}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.view').forEach(x=>x.hidden=x.id!==b.dataset.tab)}));
+document.addEventListener('change',e=>{if(e.target.matches('input[type=checkbox][data-kind]')){const arr=data[e.target.dataset.kind],t=arr.find(x=>x.id===e.target.dataset.id);if(t)t.done=e.target.checked;save()}});
+document.addEventListener('click',e=>{const d=e.target.closest('[data-delete]');if(d){const k=d.dataset.delete;data[k]=data[k].filter(x=>x.id!==d.dataset.id);save()}});
+document.getElementById('addTask').onclick=()=>{const v=document.getElementById('newTask').value.trim();if(v){data.tasks.push({id:'t'+Date.now(),text:v,done:false});document.getElementById('newTask').value='';save()}};
+document.getElementById('addUpcoming').onclick=()=>{const v=document.getElementById('newUpcoming').value.trim();if(v){data.upcoming.push({id:'u'+Date.now(),text:v,done:false});document.getElementById('newUpcoming').value='';save()}};
+document.getElementById('addLocation').onclick=()=>{const n=document.getElementById('thingName').value.trim(),p=document.getElementById('thingPlace').value.trim();if(n&&p){data.locations.push({id:'l'+Date.now(),name:n,place:p});document.getElementById('thingName').value='';document.getElementById('thingPlace').value='';save()}};
+document.getElementById('saveStudy').onclick=()=>{data.studyNote=document.getElementById('studyNote').value;localStorage.setItem(KEY,JSON.stringify(data));document.getElementById('studySaved').textContent='Study note सेव हो गया।'};
+document.getElementById('saveNotes').onclick=()=>{data.quickNotes=document.getElementById('quickNotes').value;localStorage.setItem(KEY,JSON.stringify(data));document.getElementById('notesSaved').textContent='Notes सेव हो गए।'};
+document.getElementById('exportData').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='seema-dashboard-backup.json';a.click();URL.revokeObjectURL(url);document.getElementById('backupStatus').textContent='Backup डाउनलोड शुरू हुआ।'};
+document.getElementById('importData').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;const obj=JSON.parse(await f.text());if(!obj.tasks||!obj.locations)throw Error();data=obj;save();document.getElementById('backupStatus').textContent='Backup वापस आ गया।'}catch(err){document.getElementById('backupStatus').textContent='यह backup file सही नहीं लग रही।'}};
+renderAll();
+</script>
+</body>
+</html>
